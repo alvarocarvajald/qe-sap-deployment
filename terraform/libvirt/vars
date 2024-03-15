@@ -1,0 +1,4 @@
+qemu+ssh://root@gollum-p0.qa.suse.de/system
+SLE-15-SP4-x86_64-Build151.1-sles4sap-gnome.qcow2
+http://openqa.suse.de/tests/8752201/asset/hdd/SLE-15-SP4-x86_64-Build151.1-sles4sap-gnome.qcow2
+
