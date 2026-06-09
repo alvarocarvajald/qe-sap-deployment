@@ -36,6 +36,20 @@
       failed_when: zypper_patch.rc not in [0, 102, 103]
       changed_when: zypper_patch.rc == 102 or zypper_patch.changed
 
+    - name: Proactively run zypper purge-kernels if reboot is requested
+      ansible.builtin.command: zypper purge-kernels
+      register: purge_kernels_result
+      when: zypper_patch.rc in [102, 103]
+      changed_when: true
+      failed_when: false
+
+    - name: Display the time taken for zypper purge-kernels
+      ansible.builtin.debug:
+        msg: "zypper purge-kernels execution time: {{ purge_kernels_result.delta }}"
+      when:
+        - zypper_patch.rc in [102, 103]
+        - purge_kernels_result.rc == 0
+
     - name: Trigger reboot+zypp_wait handler if zypper exit code requires it
       ansible.builtin.debug:
         msg: "Patches applied (zypper rc={{ zypper_patch.rc }}), triggering reboot"
