@@ -28,14 +28,6 @@
       ansible.builtin.systemd:
         daemon_reload: true
 
-    - name: Start pacemaker
-      ansible.builtin.systemd:
-        name: pacemaker
-        state: started
-        enabled: true
-      register: pacemaker_start_result
-      ignore_errors: true
-
     # When the stonith device is changed the file /var/lib/sbd is changed
     - name: Write stonith status file
       ansible.builtin.file:
@@ -69,6 +61,20 @@
         crm_prop_fencing_action: "{{ 'fencing-action' if ansible_distribution_version is version('16.1', '>=') else 'stonith-action' }}"
 
   tasks:
+    - name: Disable cloud-netconfig manage [azure]
+      ansible.builtin.include_tasks: ./tasks/disable-cloud-netconfig.yaml
+      when: cloud_platform_is_azure
+      tags: disable_cloud_netconfig
+
+    - name: Setup aws directory [aws]
+      ansible.builtin.include_tasks: ./tasks/setup-aws-directory.yaml
+      when: cloud_platform_is_aws
+      tags: aws_directory
+
+    - name: Common cluster initialization
+      ansible.builtin.include_tasks: ./tasks/cluster-bootstrap-init.yaml
+      tags: cluster_init
+
     - name: Base Cluster Configuration [azure]
       ansible.builtin.include_tasks: ./tasks/azure-cluster-bootstrap.yaml
       when: cloud_platform_is_azure

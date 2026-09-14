@@ -1,0 +1,20 @@
+---
+# Setup aws directory for root user
+
+# AWS-specific: upload credentials to target nodes.
+- name: Ensure aws directory exists
+  ansible.builtin.file:
+    path: /root/.aws
+    state: directory
+    mode: '0700'
+
+- name: Upload aws files
+  ansible.builtin.copy:
+    src: "~/.aws/{{ item }}"
+    dest: "/root/.aws/{{ item }}"
+    owner: root
+    group: root
+    mode: '0600'
+  loop:
+    - credentials
+    - config

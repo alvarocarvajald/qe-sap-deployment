@@ -485,6 +485,37 @@ Like the other playbooks that are directly connected to HANA operations,
 this playbook also sources `hana_vars.yaml` for consistency. By default,
 an SBD based cluster will not be created.
 
+### Cluster formation
+
+On all three cloud service providers, the cluster is formed with the crmsh
+bootstrap commands: `crm cluster init` on the primary node and `crm cluster join`
+on the remaining nodes. `crmsh` takes care of generating and distributing
+`/etc/corosync/authkey` and `/etc/corosync/corosync.conf` and of starting the
+cluster stack. This requires passwordless root ssh and hostname
+resolution among the nodes, both of which are set up by the `pre-cluster`
+playbook.
+
+Once the cluster exists, the same corosync tuning is applied on every
+cloud service provider, and defaults to:
+
+* token: 30000
+* token_retransmits_before_loss_const: 10
+* join: 60
+* consensus: 36000
+* max_messages: 20
+* expected_votes: 2
+* two_node: 1
+
+These values can be overridden by passing different values via the
+`corosync_params` variable to the `cluster-bootstrap-init.yaml` ansible
+task. For details on the format of the variable, read the summary on the
+task file itself.
+
+When SBD fencing is used, `crm cluster init` is called with the SBD
+devices found in `/etc/sysconfig/sbd`, and the fencing resource it
+creates is then replaced by one carrying `pcmk_delay_max=15`. The
+resource is named `stonith-sbd`, or `fencing-sbd` from SLE 16.1 onwards.
+
 ### AWS native fencing
 
 AWS uses the `stonith:external/ec2` agent. Following the SUSE/AWS

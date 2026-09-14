@@ -1,0 +1,18 @@
+---
+# Ensure CLOUD_NETCONFIG_MANAGE is disabled for eth0
+
+- name: Ensure 'CLOUD_NETCONFIG_MANAGE' is disabled for eth0
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/network/ifcfg-eth0
+    regexp: '^CLOUD_NETCONFIG_MANAGE='
+    line: 'CLOUD_NETCONFIG_MANAGE="no"'
+    backup: true
+  when: ansible_distribution_major_version != '16'
+
+- name: Ensure 'CLOUD_NETCONFIG_MANAGE' is disabled for eth0 for SLES 16.0
+  ansible.builtin.lineinfile:
+    path: /usr/etc/default/cloud-netconfig
+    regexp: '^CLOUD_NETCONFIG_MANAGE='
+    line: 'CLOUD_NETCONFIG_MANAGE="no"'
+    backup: true
+  when: ansible_distribution_major_version == '16'
